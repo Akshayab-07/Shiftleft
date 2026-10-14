@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftLab — Visual Barrel Shifter & Bit Manipulation Simulator</title>
+  <meta name="description" content="An interactive 8-bit barrel shifter and bit manipulation simulator for Computer Organization and Architecture (COA) education and embedded systems demonstrations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 14 10 14 10 20"></polyline>
+            <polyline points="20 10 14 10 14 4"></polyline>
+            <line x1="14" y1="10" x2="21" y2="3"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Shift<span>Lab</span></h1>
+          <p class="brand-subtitle">Visual Barrel Shifter &amp; Bit Manipulation Simulator &bull; COA Project</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button class="nav-btn active" data-target="section-simulator" id="nav-sim-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          Bit Simulator
+        </button>
+        <button class="nav-btn" data-target="section-hardware" id="nav-hw-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Barrel Shifter Architecture
+        </button>
+        <button class="nav-btn" data-target="section-register" id="nav-reg-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Embedded Register &amp; LEDs
+        </button>
+        <button class="nav-btn info-btn" id="open-guide-btn" title="COA Theory & Reference Guide">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Guide
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notification Banner / Status -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-content">
+      <span class="status-indicator"></span>
+      <span class="status-text" id="statusMessage">System Ready. Select an operation and shift amount, then click Simulate.</span>
+    </div>
+    <div class="status-actions">
+      <button class="btn-ghost" id="globalResetBtn" title="Reset all simulators to default state">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <main class="main-container">
+
+    <!-- ========================================== -->
+    <!-- FEATURE 1: INTERACTIVE BIT MANIPULATION   -->
+    <!-- ========================================== -->
+    <section id="section-simulator" class="content-section active">
+      <div class="section-header">
+        <div>
+          <h2>8-Bit Bit Manipulation Simulator</h2>
+          <p class="section-desc">Inspect exact bit transitions, sign preservation, discarded overflow bits, and inserted padding bits.</p>
+        </div>
+        <div class="quick-presets">
+          <span class="label-badge">COA Test Vectors:</span>
+          <button class="preset-pill" data-val="13" data-op="LSL" data-amt="1">13 LSL 1 (26)</button>
+          <button class="preset-pill" data-val="13" data-op="LSR" data-amt="1">13 LSR 1 (6)</button>
+          <button class="preset-pill" data-val="129" data-op="ROL" data-amt="1">0x81 ROL 1 (3)</button>
+          <button class="preset-pill" data-val="128" data-op="ASR" data-amt="1">0x80 ASR 1 (0xC0)</button>
+        </div>
+      </div>
+
+      <div class="grid-layout sim-grid">
+        <!-- Input & Controls Card -->
+        <div class="card panel-controls">
+          <div class="card-header">
+            <h3>Input Parameters</h3>
+            <span class="tag-badge">8-Bit Data Word</span>
+          </div>
+
+          <!-- Decimal & Binary Input Row -->
+          <div class="input-group">
+            <div class="input-field-wrap">
+              <label for="decInput">Decimal Value (0 &ndash; 255):</label>
+              <div class="input-with-controls">
+                <input type="number" id="decInput" min="0" max="255" value="13" class="form-input">
+                <div class="spin-buttons">
+                  <button type="button" id="decIncBtn" class="spin-btn" title="Increment">+</button>
+                  <button type="button" id="decDecBtn" class="spin-btn" title="Decrement">&minus;</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="input-field-wrap">
+              <label for="binInput">8-Bit Binary Input:</label>
+              <input type="text" id="binInput" maxlength="8" value="00001101" class="form-input mono" spellcheck="false" placeholder="e.g. 00001101">
+            </div>
+          </div>
+
+          <!-- Clickable Interactive Input Bits -->
+          <div class="bit-strip-container">
+            <label class="sub-label">Interactive Bit Toggles (Click bit to flip 0 &harr; 1):</label>
+            <div class="bit-strip" id="inputBitStrip">
+              <!-- Rendered via JS: D7 down to D0 -->
+            </div>
+            <div class="bit-weight-labels">
+              <span>Bit 7 (128)</span>
+              <span>Bit 6 (64)</span>
+              <span>Bit 5 (32)</span>
+              <span>Bit 4 (16)</span>
+              <span>Bit 3 (8)</span>
+              <span>Bit 2 (4)</span>
+              <span>Bit 1 (2)</span>
+              <span>Bit 0 (1)</span>
+            </div>
+          </div>
+
+          <!-- Operation Selector -->
+          <div class="input-field-wrap">
+            <label for="operationSelect">Shift / Rotate Operation:</label>
+            <div class="select-wrapper">
+              <select id="operationSelect" class="form-select">
+                <option value="LSL">Logical Left Shift (LSL / SHL)</option>
+                <option value="LSR">Logical Right Shift (LSR / SHR)</option>
+                <option value="ASR">Arithmetic Right Shift (ASR / SAR &mdash; Preserves Sign MSB)</option>
+                <option value="ROL">Circular Left Rotation (ROL / RLC)</option>
+                <option value="ROR">Circular Right Rotation (ROR / RRC)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Operation Explanation Card -->
+          <div class="op-summary-box" id="opSummaryBox">
+            <div class="op-icon-tag" id="opIconTag">&laquo;</div>
+            <div class="op-desc-text" id="opDescText">
+              <strong>Logical Left Shift:</strong> Shifts bits left. Bit 7 is discarded into overflow. A <code>0</code> is inserted at Bit 0. Multiplies value by 2<sup>n</sup> (if no overflow).
+            </div>
+          </div>
+
+          <!-- Shift Amount Selection -->
+          <div class="input-field-wrap">
+            <div class="flex-between">
+              <label for="shiftAmtSlider">Shift Amount (0 &ndash; 7):</label>
+              <span class="shift-amt-badge">Shift Count: <strong id="shiftAmtDisplay">1</strong> (<span class="mono" id="shiftControlBits">S₂S₁S₀ = 001</span>)</span>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="shiftAmtSlider" min="0" max="7" value="1" class="form-slider">
+              <div class="shift-quick-buttons">
+                <button type="button" class="btn-amt" data-amt="0">0</button>
+                <button type="button" class="btn-amt active" data-amt="1">1</button>
+                <button type="button" class="btn-amt" data-amt="2">2</button>
+                <button type="button" class="btn-amt" data-amt="3">3</button>
+                <button type="button" class="btn-amt" data-amt="4">4</button>
+                <button type="button" class="btn-amt" data-amt="5">5</button>
+                <button type="button" class="btn-amt" data-amt="6">6</button>
+                <button type="button" class="btn-amt" data-amt="7">7</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-row">
+            <button class="btn-primary" id="simulateBtn">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Simulate Operation
+            </button>
+            <button class="btn-secondary" id="resetSimBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              Clear / Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Simulation Results & Bit Movement Card -->
+        <div class="card panel-results">
+          <div class="card-header">
+            <h3>Execution Results &amp; Dataflow</h3>
+            <span class="status-pill active" id="simResultPill">Computed</span>
+          </div>
+
+          <!-- Value Comparison Displays -->
+          <div class="results-triad">
+            <div class="result-tile">
+              <span class="tile-label">Binary Result</span>
+              <div class="tile-val mono cyan" id="resultBin">00011010</div>
+              <span class="tile-sub mono" id="originalBinSub">Initial: 00001101</span>
+            </div>
+            <div class="result-tile">
+              <span class="tile-label">Decimal Result</span>
+              <div class="tile-val green" id="resultDec">26</div>
+              <span class="tile-sub" id="originalDecSub">Initial: 13</span>
+            </div>
+            <div class="result-tile">
+              <span class="tile-label">Hexadecimal</span>
+              <div class="tile-val mono purple" id="resultHex">0x1A</div>
+              <span class="tile-sub mono" id="originalHexSub">Initial: 0x0D</span>
+            </div>
+          </div>
+
+          <!-- Bit Movement Interactive Visualizer -->
+          <div class="movement-visualizer">
+            <div class="viz-header">
+              <h4>Bit Position Shift &amp; Boundary Mapping</h4>
+              <span class="viz-legend">
+                <span class="legend-item"><span class="dot normal"></span> Preserved</span>
+                <span class="legend-item"><span class="dot inserted"></span> Inserted (0 / Sign / Wrap)</span>
+                <span class="legend-item"><span class="dot discarded"></span> Discarded / Overflow</span>
+              </span>
+            </div>
+
+            <!-- Visual Flow Stages -->
+            <div class="flow-container">
+              <!-- Top Row: Input Bits with source indices -->
+              <div class="flow-row">
+                <div class="flow-row-label">Input Word:</div>
+                <div class="flow-bits" id="flowInputBits">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Middle: Dynamic SVG connecting wires / movement vectors -->
+              <div class="flow-vector-canvas-wrap">
+                <svg id="vectorSvg" class="vector-svg" viewBox="0 0 640 90" preserveAspectRatio="none">
+                  <!-- Dynamic path connections drawn here -->
+                </svg>
+              </div>
+
+              <!-- Bottom Row: Output Bits with destination status -->
+              <div class="flow-row">
+                <div class="flow-row-label">Output Word:</div>
+                <div class="flow-bits" id="flowOutputBits">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Boundary & Overflow Tagging Row -->
+            <div class="boundary-tags-panel">
+              <div class="boundary-box inserted-box">
+                <span class="boundary-title">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  Inserted Bits:
+                </span>
+                <div class="boundary-content" id="insertedBitsContent">
+                  <span class="boundary-bit-badge inserted">Bit 0 = 0</span>
+                </div>
+              </div>
+
+              <div class="boundary-box discarded-box">
+                <span class="boundary-title">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  Discarded / Overflow:
+                </span>
+                <div class="boundary-content" id="discardedBitsContent">
+                  <span class="boundary-bit-badge discarded">Bit 7 was '0'</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mathematical Transformation Equation -->
+            <div class="math-callout" id="mathFormulaCallout">
+              <span class="formula-icon">&fnof;(x)</span>
+              <span class="formula-text" id="mathFormulaText">Y = (X &laquo; 1) &amp; 0xFF = (13 &times; 2<sup>1</sup>) = 26</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- FEATURE 2: 3-STAGE BARREL SHIFTER HARDWARE -->
+    <!-- ========================================== -->
+    <section id="section-hardware" class="content-section">
+      <div class="section-header">
+        <div>
+          <h2>8-Bit Barrel Shifter Hardware Architecture</h2>
+          <p class="section-desc">Logarithmic 3-Stage Multiplexer Array ($O(\log_2 N) = 3$ stages). Each stage conditionally shifts data in a single clock cycle.</p>
+        </div>
+        <div class="hw-controls-top">
+          <button class="btn-step" id="hwStepBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
+            Step Through Stages
+          </button>
+          <button class="btn-step" id="hwAnimateAllBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Animate Signal Flow
+          </button>
+        </div>
+      </div>
+
+      <!-- Architectural Context Banner -->
+      <div class="arch-info-strip">
+        <div class="arch-stat">
+          <span class="arch-stat-label">Shift Amount</span>
+          <span class="arch-stat-val mono" id="hwShiftAmtLabel">k = 1</span>
+        </div>
+        <div class="arch-stat">
+          <span class="arch-stat-label">Control Bus</span>
+          <span class="arch-stat-val mono cyan" id="hwControlSignals">S₂=0 &bull; S₁=0 &bull; S₀=1</span>
+        </div>
+        <div class="arch-stat">
+          <span class="arch-stat-label">Multiplexer Stages</span>
+          <span class="arch-stat-val">3 Cascaded 2:1 MUX Columns</span>
+        </div>
+        <div class="arch-stat">
+          <span class="arch-stat-label">Propagation Delay</span>
+          <span class="arch-stat-val green">3 &times; t<sub>MUX</sub> (Single Cycle)</span>
+        </div>
+      </div>
+
+      <!-- Interactive Hardware Schematic Canvas/DOM Container -->
+      <div class="card hw-schematic-card">
+        <div class="hw-schematic-container" id="hwSchematicContainer">
+          
+          <!-- Column 0: Input Register Bus -->
+          <div class="hw-column hw-col-input" id="hwColInput">
+            <div class="hw-col-title">
+              <span>Input Bus</span>
+              <span class="mono cyan">D[7:0]</span>
+            </div>
+            <div class="hw-bus-bits" id="hwInputBusBits">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Column 1: Stage 0 (Shift 1 bit, Controlled by S0) -->
+          <div class="hw-column hw-col-stage" id="hwStage0">
+            <div class="stage-badge" id="hwStage0Badge">
+              <span class="stage-tag">STAGE 0 &bull; Shift 1</span>
+              <span class="control-state mono" id="hwS0State">S₀ = 1 (SHIFT)</span>
+            </div>
+            <div class="mux-array" id="hwMuxArray0">
+              <!-- 8 Multiplexers rendered via JS -->
+            </div>
+            <div class="intermediate-bus" id="hwInterBus0">
+              <span class="inter-label">Bus I⁽¹⁾[7:0]</span>
+              <div class="inter-bits" id="hwInterBits0"></div>
+            </div>
+          </div>
+
+          <!-- Column 2: Stage 1 (Shift 2 bits, Controlled by S1) -->
+          <div class="hw-column hw-col-stage" id="hwStage1">
+            <div class="stage-badge" id="hwStage1Badge">
+              <span class="stage-tag">STAGE 1 &bull; Shift 2</span>
+              <span class="control-state mono" id="hwS1State">S₁ = 0 (PASS)</span>
+            </div>
+            <div class="mux-array" id="hwMuxArray1">
+              <!-- 8 Multiplexers rendered via JS -->
+            </div>
+            <div class="intermediate-bus" id="hwInterBus1">
+              <span class="inter-label">Bus I⁽²⁾[7:0]</span>
+              <div class="inter-bits" id="hwInterBits1"></div>
+            </div>
+          </div>
+
+          <!-- Column 3: Stage 2 (Shift 4 bits, Controlled by S2) -->
+          <div class="hw-column hw-col-stage" id="hwStage2">
+            <div class="stage-badge" id="hwStage2Badge">
+              <span class="stage-tag">STAGE 2 &bull; Shift 4</span>
+              <span class="control-state mono" id="hwS2State">S₂ = 0 (PASS)</span>
+            </div>
+            <div class="mux-array" id="hwMuxArray2">
+              <!-- 8 Multiplexers rendered via JS -->
+            </div>
+            <div class="intermediate-bus" id="hwInterBus2">
+              <span class="inter-label">Bus I⁽³⁾[7:0]</span>
+              <div class="inter-bits" id="hwInterBits2"></div>
+            </div>
+          </div>
+
+          <!-- Column 4: Output Bus -->
+          <div class="hw-column hw-col-output" id="hwColOutput">
+            <div class="hw-col-title">
+              <span>Output Bus</span>
+              <span class="mono green">Y[7:0]</span>
+            </div>
+            <div class="hw-bus-bits" id="hwOutputBusBits">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- MUX Theory Explainer Bar -->
+        <div class="mux-theory-bar">
+          <div class="theory-item">
+            <span class="mux-symbol-chip">2:1 MUX</span>
+            <span><strong>Multiplexer Routing:</strong> When control bit <code>S = 0</code>, the MUX selects channel 0 (straight pass-through). When <code>S = 1</code>, it selects channel 1 (shifted position by 2<sup>stage</sup> bits).</span>
+          </div>
+          <div class="theory-item">
+            <span class="mux-symbol-chip active-chip">COA Advantage</span>
+            <span>Unlike serial shift registers that require <em>k</em> clock cycles, a logarithmic barrel shifter resolves arbitrary shift counts $0 \le k < 8$ in a single instruction cycle.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- FEATURE 3: EMBEDDED-DEVICE REGISTER SIM   -->
+    <!-- ========================================== -->
+    <section id="section-register" class="content-section">
+      <div class="section-header">
+        <div>
+          <h2>Embedded-Device 8-Bit Register &amp; Virtual LEDs</h2>
+          <p class="section-desc">Hardware representation of an 8-bit microcontroller GPIO Port / Status Register (e.g. AVR <code>PORTB</code> or ARM Cortex <code>GPIOD_ODR</code>).</p>
+        </div>
+        <div class="reg-quick-presets">
+          <span class="label-badge">Embedded Presets:</span>
+          <button class="preset-pill" id="presetChaserBtn">LED Chaser (0x01)</button>
+          <button class="preset-pill" id="presetFlagsBtn">CPU Flags (0x85)</button>
+          <button class="preset-pill" id="presetAltBtn">Alternating (0xAA)</button>
+          <button class="preset-pill" id="presetAllOnBtn">All High (0xFF)</button>
+        </div>
+      </div>
+
+      <div class="grid-layout reg-grid">
+        <!-- Physical Virtual PCB Card -->
+        <div class="card pcb-card">
+          <div class="pcb-header">
+            <div class="pcb-title">
+              <span class="pcb-screwhole"></span>
+              <span>DEV-BOARD &bull; GPIO PORT 0x0025</span>
+            </div>
+            <span class="pcb-power-badge">VCC: 3.3V ACTIVE</span>
+          </div>
+
+          <!-- LED Panel & Toggle Switches -->
+          <div class="virtual-led-panel" id="virtualLedPanel">
+            <!-- 8 LEDs & Push-Toggles rendered via JS -->
+          </div>
+
+          <!-- Embedded Register Value Readout -->
+          <div class="reg-readout-strip">
+            <div class="reg-val-box">
+              <span class="val-label">BINARY [b7 .. b0]</span>
+              <span class="val-number mono cyan" id="regBinReadout">00001101</span>
+            </div>
+            <div class="reg-val-box">
+              <span class="val-label">DECIMAL VALUE</span>
+              <span class="val-number green" id="regDecReadout">13</span>
+            </div>
+            <div class="reg-val-box">
+              <span class="val-label">HEX VALUE</span>
+              <span class="val-number mono purple" id="regHexReadout">0x0D</span>
+            </div>
+            <div class="reg-val-box">
+              <span class="val-label">ACTIVE PINS HIGH</span>
+              <span class="val-number mono amber" id="regActivePins">3 of 8</span>
+            </div>
+          </div>
+
+          <!-- Hardware Manipulation Controls -->
+          <div class="pcb-actions-toolbar">
+            <div class="toolbar-group">
+              <span class="group-title">Single-Step Shift &amp; Rotate Operations:</span>
+              <div class="reg-btn-cluster">
+                <button class="btn-reg-action" id="regLslBtn" title="Logical Left Shift by 1 bit (<< 1)">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                  LSL (1)
+                </button>
+                <button class="btn-reg-action" id="regLsrBtn" title="Logical Right Shift by 1 bit (>> 1)">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+                  LSR (1)
+                </button>
+                <button class="btn-reg-action" id="regAsrBtn" title="Arithmetic Right Shift by 1 bit (preserves MSB)">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/></svg>
+                  ASR (1)
+                </button>
+                <button class="btn-reg-action" id="regRolBtn" title="Circular Rotate Left by 1 bit">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  ROL (1)
+                </button>
+                <button class="btn-reg-action" id="regRorBtn" title="Circular Rotate Right by 1 bit">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                  ROR (1)
+                </button>
+              </div>
+            </div>
+
+            <div class="toolbar-group">
+              <span class="group-title">Register Utilities:</span>
+              <div class="reg-btn-cluster">
+                <button class="btn-reg-util" id="regNotBtn" title="Bitwise NOT / Invert all bits (~X)">
+                  <span class="mono">NOT (~)</span>
+                </button>
+                <button class="btn-reg-util" id="regClrBtn" title="Clear Register to 0x00">
+                  <span>CLR (0x00)</span>
+                </button>
+                <button class="btn-reg-util" id="regSyncSimBtn" title="Sync value from Simulator section">
+                  <span>Sync with Simulator</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Embedded Architecture & Real-World Use Case Card -->
+        <div class="card pcb-info-card">
+          <div class="card-header">
+            <h3>Embedded Bit Manipulation Principles</h3>
+            <span class="tag-badge">Firmware Applications</span>
+          </div>
+
+          <div class="embedded-notes">
+            <div class="note-block">
+              <div class="note-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              </div>
+              <div class="note-body">
+                <h4>1. Hardware Control Flags &amp; Status Registers</h4>
+                <p>Microcontroller CPU status registers (e.g. SREG or CCR) use single bit positions for zero (Z), negative (N), overflow (V), and carry (C) flags. Bit shifts enable fast bitwise testing without branch overhead.</p>
+              </div>
+            </div>
+
+            <div class="note-block">
+              <div class="note-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <div class="note-body">
+                <h4>2. Efficient Arithmetic by Powers of Two</h4>
+                <p>Logical Left Shift by $n$ computes $x \times 2^n$. Arithmetic Right Shift computes $\lfloor x / 2^n \rfloor$ while maintaining the signed two's complement value without invoking an expensive ALU multiplier hardware cycle.</p>
+              </div>
+            </div>
+
+            <div class="note-block">
+              <div class="note-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="note-body">
+                <h4>3. GPIO Pin Masking in C / Assembly</h4>
+                <p>Embedded C code uses bitwise shifts to target specific peripheral pins:</p>
+                <pre class="code-snippet"><code><span class="tok-comment">// Set Pin 3 High without altering other pins</span>
+PORTB |= (1 &lt;&lt; 3);
+
+<span class="tok-comment">// Clear Pin 3 Low</span>
+PORTB &amp;= ~(1 &lt;&lt; 3);
+
+<span class="tok-comment">// Shift chaser pattern left</span>
+PORTB = (PORTB &lt;&lt; 1) | (PORTB &gt;&gt; 7);</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Educational Reference & Theory Modal -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-chip">COA Reference</span>
+          <h3>Computer Organization &amp; Architecture: Barrel Shifter Theory</h3>
+        </div>
+        <button class="modal-close-btn" id="closeGuideBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <h4>1. What is a Barrel Shifter?</h4>
+        <p>A <strong>barrel shifter</strong> is a combinational logic circuit capable of shifting or rotating a computer data word by a specified number of bits in a single clock cycle, regardless of shift amount. In contrast to sequential shift registers that require <em>n</em> clock cycles for an <em>n</em>-bit shift, a barrel shifter uses multiplexer stages to execute shifts in $O(1)$ clock cycles ($O(\log_2 N)$ gate propagation delay).</p>
+
+        <h4>2. Architecture of the 3-Stage Logarithmic Barrel Shifter</h4>
+        <p>For an 8-bit word ($N = 8$), the shift count $k$ ($0 \le k \le 7$) is represented as a 3-bit binary integer $S = (S_2 S_1 S_0)_2$ where $k = 4 \cdot S_2 + 2 \cdot S_1 + 1 \cdot S_0$.</p>
+        <table class="theory-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Control Signal</th>
+              <th>Action When S<sub>n</sub> = 0</th>
+              <th>Action When S<sub>n</sub> = 1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stage 0</strong></td>
+              <td><code>S₀</code> (Bit 0)</td>
+              <td>Pass through unchanged (Shift 0)</td>
+              <td>Shift by <strong>1 bit</strong> position (2<sup>0</sup>)</td>
+            </tr>
+            <tr>
+              <td><strong>Stage 1</strong></td>
+              <td><code>S₁</code> (Bit 1)</td>
+              <td>Pass through unchanged (Shift 0)</td>
+              <td>Shift by <strong>2 bits</strong> position (2<sup>1</sup>)</td>
+            </tr>
+            <tr>
+              <td><strong>Stage 2</strong></td>
+              <td><code>S₂</code> (Bit 2)</td>
+              <td>Pass through unchanged (Shift 0)</td>
+              <td>Shift by <strong>4 bits</strong> position (2<sup>2</sup>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>3. Summary of Bit Operations</h4>
+        <ul class="theory-list">
+          <li><strong>LSL (Logical Shift Left):</strong> Bits move left towards MSB. Discarded MSB bits are lost. <code>0</code> is padded into LSB.</li>
+          <li><strong>LSR (Logical Shift Right):</strong> Bits move right towards LSB. Discarded LSB bits are lost. <code>0</code> is padded into MSB.</li>
+          <li><strong>ASR (Arithmetic Shift Right):</strong> Bits move right. The sign bit (MSB, Bit 7) is copied into all newly opened positions to preserve negative two's-complement numbers.</li>
+          <li><strong>ROL (Rotate Left):</strong> Bits rotated off the MSB wrap around to fill vacated LSB positions; no bits are lost.</li>
+          <li><strong>ROR (Rotate Right):</strong> Bits rotated off the LSB wrap around to fill vacated MSB positions; no bits are lost.</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-primary" id="modalUnderstoodBtn">Got it, Return to Lab</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p><strong>ShiftLab</strong> &bull; Computer Organization &amp; Architecture (COA) Academic Project &bull; 8-Bit Barrel Shifter Simulator</p>
+      <p class="footer-sub">Software visualization of hardware architecture &bull; Fully client-side interactive simulation</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
