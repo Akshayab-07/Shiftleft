@@ -43,11 +43,41 @@ export interface HardwareStageComputation {
   outputBus: number;
 }
 
+export interface MuxBitTrace {
+  bit: number;
+  unchanged: number;
+  shifted: number;
+  select: number;
+  output: number;
+  sourceBit: number | null;
+}
+
+export interface SimulationStage {
+  index: number;
+  distance: number;
+  inputBus: number;
+  select: number;
+  candidateBus: number;
+  outputBus: number;
+  muxes: MuxBitTrace[];
+}
+
+export interface SimulationTrace {
+  input: number;
+  operation: ShiftOperation;
+  k: number;
+  finalOutput: number;
+  stages: SimulationStage[];
+  controls: { s0: number; s1: number; s2: number };
+  inputs: { inputBus: number };
+}
+
 /**
  * Clamps any integer to valid 8-bit range [0, 255].
  */
 export function clamp8(n: number): number {
-  return ((n % 256) + 256) % 256;
+  if (!Number.isFinite(n)) return 0;
+  return ((Math.trunc(n) % 256) + 256) % 256;
 }
 
 /**
@@ -98,6 +128,70 @@ export function computeShift(val: number, op: ShiftOperation, amt: number): numb
     default:
       return v;
   }
+}
+
+function shiftedBit(input: number, operation: ShiftOperation, distance: number, bit: number): { value: number; sourceBit: number | null } {
+  if (operation === 'LSL') {
+    const sourceBit = bit - distance;
+    return sourceBit >= 0 ? { value: (input >>> sourceBit) & 1, sourceBit } : { value: 0, sourceBit: null };
+  }
+  if (operation === 'LSR' || operation === 'ASR') {
+    const sourceBit = bit + distance;
+    if (sourceBit <= 7) return { value: (input >>> sourceBit) & 1, sourceBit };
+    return operation === 'ASR' ? { value: (input >>> 7) & 1, sourceBit: 7 } : { value: 0, sourceBit: null };
+  }
+  const sourceBit = operation === 'ROL'
+    ? (bit - distance + 8) % 8
+    : (bit + distance) % 8;
+  return { value: (input >>> sourceBit) & 1, sourceBit };
+}
+
+function computeStage(input: number, operation: ShiftOperation, distance: number, select: number, index: number): SimulationStage {
+  const candidateBus = computeShift(input, operation, distance);
+  const muxes = Array.from({ length: 8 }, (_, bit) => {
+    const shifted = shiftedBit(input, operation, distance, bit);
+    const unchanged = (input >>> bit) & 1;
+    return {
+      bit,
+      unchanged,
+      shifted: shifted.value,
+      select,
+      output: select ? shifted.value : unchanged,
+      sourceBit: shifted.sourceBit,
+    };
+  });
+  const outputBus = muxes.reduce((value, mux) => value | (mux.output << mux.bit), 0) & 0xff;
+  return { index, distance, inputBus: input, select, candidateBus, outputBus, muxes };
+}
+
+/** Simulates the complete 8-bit three-stage MUX network and returns its trace. */
+export function simulate(input: number, operation: ShiftOperation, k: number): SimulationTrace {
+  const normalizedInput = clamp8(input);
+  if (!Number.isInteger(k) || k < 0 || k > 7) {
+    throw new RangeError('Shift amount must be an integer from 0 through 7.');
+  }
+  const normalizedK = k;
+  const s0 = normalizedK & 1 ? 1 : 0;
+  const s1 = normalizedK & 2 ? 1 : 0;
+  const s2 = normalizedK & 4 ? 1 : 0;
+  const selections = [s0, s1, s2];
+  const distances = [1, 2, 4];
+  const stages: SimulationStage[] = [];
+  let bus = normalizedInput;
+  for (let index = 0; index < 3; index += 1) {
+    const stage = computeStage(bus, operation, distances[index], selections[index], index);
+    stages.push(stage);
+    bus = stage.outputBus;
+  }
+  return {
+    input: normalizedInput,
+    operation,
+    k: normalizedK,
+    finalOutput: bus,
+    stages,
+    controls: { s0, s1, s2 },
+    inputs: { inputBus: normalizedInput },
+  };
 }
 
 /**
@@ -194,28 +288,17 @@ export function analyzeBitMovement(val: number, op: ShiftOperation, amt: number)
  * Shift count k = S2*4 + S1*2 + S0*1
  */
 export function computeHardwareStages(val: number, op: ShiftOperation, amt: number): HardwareStageComputation {
-  const k = amt % 8;
-  const s0 = (k & 1) ? 1 : 0;
-  const s1 = (k & 2) ? 1 : 0;
-  const s2 = (k & 4) ? 1 : 0;
-
-  // Stage 0: Shift by 1 if s0 active
-  const bus0 = s0 ? computeShift(val, op, 1) : val;
-
-  // Stage 1: Shift by 2 if s1 active
-  const bus1 = s1 ? computeShift(bus0, op, 2) : bus0;
-
-  // Stage 2: Shift by 4 if s2 active
-  const bus2 = s2 ? computeShift(bus1, op, 4) : bus1;
+  const trace = simulate(val, op, amt);
+  const [stage0, stage1, stage2] = trace.stages;
 
   return {
-    s0,
-    s1,
-    s2,
-    inputBus: val,
-    bus0,
-    bus1,
-    bus2,
-    outputBus: bus2
+    s0: trace.controls.s0,
+    s1: trace.controls.s1,
+    s2: trace.controls.s2,
+    inputBus: trace.input,
+    bus0: stage0.outputBus,
+    bus1: stage1.outputBus,
+    bus2: stage2.outputBus,
+    outputBus: trace.finalOutput,
   };
 }

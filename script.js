@@ -1,6 +1,6 @@
 /**
  * ShiftLab — A Visual Barrel Shifter & Bit Manipulation Simulator
- * Computer Organization & Architecture (COA) Project
+ * Computer Organization & Architecture Project
  * 
  * Features:
  * 1. Interactive 8-Bit Manipulation Simulator (LSL, LSR, ASR, ROL, ROR)
@@ -1060,5 +1060,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initHardwareVisualization();
   initRegisterSimulator();
   initNavigation();
-  setStatus('ShiftLab initialized. Ready for simulation and COA presentation.');
+  setStatus('ShiftLab initialized. Ready for simulation and Computer Organization and Architecture presentation.');
 });

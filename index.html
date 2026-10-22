@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ShiftLab — Visual Barrel Shifter & Bit Manipulation Simulator</title>
-  <meta name="description" content="An interactive 8-bit barrel shifter and bit manipulation simulator for Computer Organization and Architecture (COA) education and embedded systems demonstrations.">
+  <meta name="description" content="An interactive 8-bit barrel shifter and bit manipulation simulator for Computer Organization and Architecture education and embedded systems demonstrations.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
         </div>
         <div>
           <h1 class="brand-title">Shift<span>Lab</span></h1>
-          <p class="brand-subtitle">Visual Barrel Shifter &amp; Bit Manipulation Simulator &bull; COA Project</p>
+          <p class="brand-subtitle">Visual Barrel Shifter &amp; Bit Manipulation Simulator &bull; Computer Organization and Architecture Project</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           Embedded Register &amp; LEDs
         </button>
-        <button class="nav-btn info-btn" id="open-guide-btn" title="COA Theory & Reference Guide">
+        <button class="nav-btn info-btn" id="open-guide-btn" title="Computer Organization and Architecture Theory & Reference Guide">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Guide
         </button>
@@ -76,7 +76,7 @@
           <p class="section-desc">Inspect exact bit transitions, sign preservation, discarded overflow bits, and inserted padding bits.</p>
         </div>
         <div class="quick-presets">
-          <span class="label-badge">COA Test Vectors:</span>
+          <span class="label-badge">Computer Organization and Architecture Test Vectors:</span>
           <button class="preset-pill" data-val="13" data-op="LSL" data-amt="1">13 LSL 1 (26)</button>
           <button class="preset-pill" data-val="13" data-op="LSR" data-amt="1">13 LSR 1 (6)</button>
           <button class="preset-pill" data-val="129" data-op="ROL" data-amt="1">0x81 ROL 1 (3)</button>
@@ -402,7 +402,7 @@
             <span><strong>Multiplexer Routing:</strong> When control bit <code>S = 0</code>, the MUX selects channel 0 (straight pass-through). When <code>S = 1</code>, it selects channel 1 (shifted position by 2<sup>stage</sup> bits).</span>
           </div>
           <div class="theory-item">
-            <span class="mux-symbol-chip active-chip">COA Advantage</span>
+            <span class="mux-symbol-chip active-chip">Computer Organization and Architecture Advantage</span>
             <span>Unlike serial shift registers that require <em>k</em> clock cycles, a logarithmic barrel shifter resolves arbitrary shift counts $0 \le k < 8$ in a single instruction cycle.</span>
           </div>
         </div>
@@ -565,7 +565,7 @@ PORTB = (PORTB &lt;&lt; 1) | (PORTB &gt;&gt; 7);</code></pre>
     <div class="modal-card">
       <div class="modal-header">
         <div class="modal-title-wrap">
-          <span class="modal-chip">COA Reference</span>
+          <span class="modal-chip">Computer Organization and Architecture Reference</span>
           <h3>Computer Organization &amp; Architecture: Barrel Shifter Theory</h3>
         </div>
         <button class="modal-close-btn" id="closeGuideBtn" aria-label="Close modal">&times;</button>
@@ -627,7 +627,7 @@ PORTB = (PORTB &lt;&lt; 1) | (PORTB &gt;&gt; 7);</code></pre>
   <!-- Footer -->
   <footer class="app-footer">
     <div class="footer-container">
-      <p><strong>ShiftLab</strong> &bull; Computer Organization &amp; Architecture (COA) Academic Project &bull; 8-Bit Barrel Shifter Simulator</p>
+      <p><strong>ShiftLab</strong> &bull; Computer Organization &amp; Architecture Academic Project &bull; 8-Bit Barrel Shifter Simulator</p>
       <p class="footer-sub">Software visualization of hardware architecture &bull; Fully client-side interactive simulation</p>
     </div>
   </footer>

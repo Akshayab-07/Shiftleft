@@ -1,12 +1,12 @@
 # ShiftLab — Visual Barrel Shifter & Bit Manipulation Simulator
-> **Computer Organization and Architecture (COA) Academic Project**  
+> **Computer Organization and Architecture Academic Project**  
 > An interactive educational simulator demonstrating 8-bit barrel shifter hardware architecture, pure bitwise operations, and real-world embedded-system register control.
 
 ---
 
 ## 📖 Project Overview
 
-**ShiftLab** bridges theoretical Computer Organization and Architecture (COA) principles with hands-on visual simulation. It demonstrates:
+**ShiftLab** bridges theoretical Computer Organization and Architecture principles with hands-on visual simulation. It demonstrates:
 1. **How 8-bit shift and rotate operations function** at the bit level (including sign preservation, bit discarding, and boundary insertion).
 2. **How a hardware Barrel Shifter executes multi-bit shifts in a single clock cycle** using a 3-stage logarithmic array of 2:1 multiplexers ($O(\log_2 N)$ gate propagation delay) instead of consuming $k$ sequential clock cycles like simple shift registers.
 3. **How embedded systems utilize 8-bit registers and bit manipulation** to control GPIO peripherals, toggle hardware pins, and decode CPU status flags.
@@ -41,7 +41,7 @@ npx serve .
 ### 1. Interactive 8-Bit Bit Manipulation Simulator
 * **Dual Input Formats**: Enter any decimal integer `0 – 255` or an 8-bit binary string (`00000000` to `11111111`).
 * **Interactive Bit Strip**: Click directly on individual bits $B_7 \dots B_0$ to toggle them between `0` and `1`.
-* **5 Core COA Operations**:
+* **5 Core Computer Organization and Architecture Operations**:
   * **Logical Left Shift (LSL / SHL)**: Bits shift left; vacated LSBs receive `0`; discarded MSBs are tracked in overflow.
   * **Logical Right Shift (LSR / SHR)**: Bits shift right; vacated MSBs receive `0`; discarded LSBs are tracked in underflow.
   * **Arithmetic Right Shift (ASR / SAR)**: Bits shift right while preserving the Most Significant Bit (Bit 7, sign bit) to maintain signed two's-complement values.
@@ -70,7 +70,7 @@ npx serve .
 
 ## 🧪 Validation & Test Vector Checklist
 
-All required COA test vectors have been verified:
+All required Computer Organization and Architecture test vectors have been verified:
 
 | Test Case | Operation | Input Binary (Dec) | Shift | Output Binary (Dec) | Hex | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -91,12 +91,12 @@ ShiftLab/
 ├── index.html        # Semantic HTML5 markup, navigation, tabs, and reference modal
 ├── styles.css        # Modern technical dark theme, responsive layout, glowing LED styles
 ├── script.js         # Pure bit manipulation engine, 3-stage hardware logic, register simulator
-└── README.md         # Documentation, launch instructions, and COA theoretical background
+└── README.md         # Documentation, launch instructions, and Computer Organization and Architecture theoretical background
 ```
 
 ---
 
-## 🎓 COA Academic Presentation Notes
+## 🎓 Computer Organization and Architecture Academic Presentation Notes
 
 When presenting to your professor, highlight these key design points:
 1. **$O(1)$ Clock Cycles vs $O(N)$ Serial Shifts**: Standard shift registers require 1 clock pulse per bit shifted. ShiftLab's barrel shifter performs arbitrary shifts $0 \le k \le 7$ in combinational logic during a single instruction execution cycle.
